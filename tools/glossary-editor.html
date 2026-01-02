@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary Editor - Unravel Codes</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #2c3e50; margin-bottom: 10px; }
+    .stats { color: #666; margin-bottom: 20px; }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-primary:hover { background: #2980b9; }
+    .btn-success { background: #27ae60; color: white; }
+    .btn-success:hover { background: #219a52; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-secondary { background: #95a5a6; color: white; }
+    .btn-secondary:hover { background: #7f8c8d; }
+    input[type="file"] { display: none; }
+    .file-label {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .file-label:hover { background: #2980b9; }
+    .search-box {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 250px;
+    }
+    .filter-select {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #2c3e50;
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover { background: #f8f9fa; }
+    tr.needs-review { background: #fff3cd; }
+    tr.needs-review:hover { background: #ffe69c; }
+    .term-cell { font-weight: 600; color: #2c3e50; }
+    .definition-cell {
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .category-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .category-Agencies { background: #3498db; color: white; }
+    .category-Construction { background: #e67e22; color: white; }
+    .category-Documents { background: #9b59b6; color: white; }
+    .category-Finance { background: #27ae60; color: white; }
+    .category-Legal { background: #e74c3c; color: white; }
+    .category-Processes { background: #1abc9c; color: white; }
+    .category-Professionals { background: #34495e; color: white; }
+    .source-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+    .source-iqarius { background: #d4edda; color: #155724; }
+    .source-game { background: #cce5ff; color: #004085; }
+    .image-thumb {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .image-thumb:hover { transform: scale(1.1); }
+    .no-image { color: #ccc; font-style: italic; font-size: 12px; }
+    .action-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; justify-content: center; align-items: flex-start; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 700px;
+      margin: 40px auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 { margin: 0; color: #2c3e50; }
+    .modal-close {
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .modal-close:hover { color: #333; }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .form-row { display: flex; gap: 16px; }
+    .form-row .form-group { flex: 1; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; }
+    .checkbox-group input { width: auto; }
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    .help-text { font-size: 12px; color: #666; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Glossary Editor</h1>
+  <div class="stats" id="stats">Load a CSV file to begin</div>
+
+  <div class="controls">
+    <label class="file-label">
+      Load CSV
+      <input type="file" id="fileInput" accept=".csv">
+    </label>
+    <button class="btn-success" onclick="downloadCSV()">Download CSV</button>
+    <button class="btn-primary" onclick="openAddModal()">+ Add Term</button>
+    <input type="text" class="search-box" placeholder="Search terms..." id="searchBox" oninput="filterTable()">
+    <select class="filter-select" id="categoryFilter" onchange="filterTable()">
+      <option value="">All Categories</option>
+    </select>
+    <select class="filter-select" id="sourceFilter" onchange="filterTable()">
+      <option value="">All Sources</option>
+      <option value="iqarius">iqarius.com</option>
+      <option value="game">Game (AI-Draft)</option>
+    </select>
+    <label class="checkbox-group">
+      <input type="checkbox" id="reviewFilter" onchange="filterTable()">
+      Needs Review Only
+    </label>
+  </div>
+
+  <table id="glossaryTable">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Category</th>
+        <th>Source</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Edit Term</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editIndex">
+        <div class="form-row">
+          <div class="form-group">
+            <label>ID (slug)</label>
+            <input type="text" id="editId" placeholder="e.g., certificate-of-occupancy">
+            <div class="help-text">Lowercase, hyphens instead of spaces</div>
+          </div>
+          <div class="form-group">
+            <label>Term (display name)</label>
+            <input type="text" id="editTerm" placeholder="e.g., Certificate of Occupancy">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Definition</label>
+          <textarea id="editDefinition" placeholder="Full definition text..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="editCategory">
+              <option value="Agencies">Agencies</option>
+              <option value="Construction">Construction</option>
+              <option value="Documents">Documents</option>
+              <option value="Finance">Finance</option>
+              <option value="Legal">Legal</option>
+              <option value="Processes">Processes</option>
+              <option value="Professionals">Professionals</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Source</label>
+            <select id="editSource">
+              <option value="iqarius">iqarius.com</option>
+              <option value="game">Game (AI-Draft)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="checkbox-group">
+              <input type="checkbox" id="editNeedsReview">
+              Needs Review
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Aliases (pipe-separated)</label>
+          <input type="text" id="editAliases" placeholder="e.g., CO|C of O">
+          <div class="help-text">Alternative names/abbreviations for this term</div>
+        </div>
+        <div class="form-group">
+          <label>Related Terms (pipe-separated IDs)</label>
+          <input type="text" id="editRelated" placeholder="e.g., permit|inspection|dob">
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="text" id="editImageUrl" placeholder="https://..." oninput="previewImage()">
+          <img id="imagePreview" class="image-preview" style="display:none;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-danger" onclick="deleteTerm()" id="deleteBtn">Delete</button>
+        <button class="btn-success" onclick="saveTerm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let glossaryData = [];
+    const CSV_HEADERS = ['id', 'term', 'definition', 'category', 'source', 'needs_review', 'aliases', 'related_terms', 'image_url'];
+
+    // Load file
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        parseCSV(e.target.result);
+      };
+      reader.readAsText(file);
+    });
+
+    function parseCSV(csv) {
+      const lines = csv.split('\n');
+      glossaryData = [];
+
+      // Skip header
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const values = parseCSVLine(line);
+        if (values.length >= 5) {
+          glossaryData.push({
+            id: values[0] || '',
+            term: values[1] || '',
+            definition: values[2] || '',
+            category: values[3] || '',
+            source: values[4] || '',
+            needs_review: values[5] === 'true',
+            aliases: values[6] || '',
+            related_terms: values[7] || '',
+            image_url: values[8] || ''
+          });
+        }
+      }
+
+      updateStats();
+      populateFilters();
+      renderTable();
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current);
+
+      return result;
+    }
+
+    function updateStats() {
+      const iqariusCount = glossaryData.filter(d => d.source === 'iqarius').length;
+      const gameCount = glossaryData.filter(d => d.source === 'game').length;
+      const reviewCount = glossaryData.filter(d => d.needs_review).length;
+      const withImages = glossaryData.filter(d => d.image_url).length;
+
+      document.getElementById('stats').innerHTML =
+        `<strong>${glossaryData.length}</strong> terms | ` +
+        `<span style="color:#27ae60">${iqariusCount} iqarius</span> | ` +
+        `<span style="color:#3498db">${gameCount} game</span> | ` +
+        `<span style="color:#e67e22">${reviewCount} need review</span> | ` +
+        `<span style="color:#9b59b6">${withImages} with images</span>`;
+    }
+
+    function populateFilters() {
+      const categories = [...new Set(glossaryData.map(d => d.category))].sort();
+      const select = document.getElementById('categoryFilter');
+      select.innerHTML = '<option value="">All Categories</option>';
+      categories.forEach(cat => {
+        select.innerHTML += `<option value="${cat}">${cat}</option>`;
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const search = document.getElementById('searchBox').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const source = document.getElementById('sourceFilter').value;
+      const reviewOnly = document.getElementById('reviewFilter').checked;
+
+      let filtered = glossaryData.filter(item => {
+        if (search && !item.term.toLowerCase().includes(search) &&
+            !item.definition.toLowerCase().includes(search) &&
+            !item.id.toLowerCase().includes(search)) return false;
+        if (category && item.category !== category) return false;
+        if (source && item.source !== source) return false;
+        if (reviewOnly && !item.needs_review) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map((item, idx) => {
+        const realIndex = glossaryData.indexOf(item);
+        const rowClass = item.needs_review ? 'needs-review' : '';
+        const imageCell = item.image_url
+          ? `<img src="${item.image_url}" class="image-thumb" onclick="window.open('${item.image_url}')" onerror="this.outerHTML='<span class=\\'no-image\\'>broken</span>'">`
+          : '<span class="no-image">none</span>';
+
+        return `
+          <tr class="${rowClass}">
+            <td>${imageCell}</td>
+            <td class="term-cell">${escapeHtml(item.term)}<br><small style="color:#999">${item.id}</small></td>
+            <td class="definition-cell" title="${escapeHtml(item.definition)}">${escapeHtml(item.definition)}</td>
+            <td><span class="category-badge category-${item.category}">${item.category}</span></td>
+            <td><span class="source-badge source-${item.source}">${item.source}</span></td>
+            <td>
+              <button class="btn-primary action-btn" onclick="openEditModal(${realIndex})">Edit</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterTable() {
+      renderTable();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Term';
+      document.getElementById('editIndex').value = '-1';
+      document.getElementById('editId').value = '';
+      document.getElementById('editTerm').value = '';
+      document.getElementById('editDefinition').value = '';
+      document.getElementById('editCategory').value = 'Construction';
+      document.getElementById('editSource').value = 'iqarius';
+      document.getElementById('editNeedsReview').checked = false;
+      document.getElementById('editAliases').value = '';
+      document.getElementById('editRelated').value = '';
+      document.getElementById('editImageUrl').value = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('deleteBtn').style.display = 'none';
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function openEditModal(index) {
+      const item = glossaryData[index];
+      document.getElementById('modalTitle').textContent = 'Edit: ' + item.term;
+      document.getElementById('editIndex').value = index;
+      document.getElementById('editId').value = item.id;
+      document.getElementById('editTerm').value = item.term;
+      document.getElementById('editDefinition').value = item.definition;
+      document.getElementById('editCategory').value = item.category;
+      document.getElementById('editSource').value = item.source;
+      document.getElementById('editNeedsReview').checked = item.needs_review;
+      document.getElementById('editAliases').value = item.aliases;
+      document.getElementById('editRelated').value = item.related_terms;
+      document.getElementById('editImageUrl').value = item.image_url;
+      document.getElementById('deleteBtn').style.display = 'inline-block';
+      previewImage();
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    function previewImage() {
+      const url = document.getElementById('editImageUrl').value;
+      const preview = document.getElementById('imagePreview');
+      if (url) {
+        preview.src = url;
+        preview.style.display = 'block';
+        preview.onerror = () => { preview.style.display = 'none'; };
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    function saveTerm() {
+      const index = parseInt(document.getElementById('editIndex').value);
+      const item = {
+        id: document.getElementById('editId').value.trim(),
+        term: document.getElementById('editTerm').value.trim(),
+        definition: document.getElementById('editDefinition').value.trim(),
+        category: document.getElementById('editCategory').value,
+        source: document.getElementById('editSource').value,
+        needs_review: document.getElementById('editNeedsReview').checked,
+        aliases: document.getElementById('editAliases').value.trim(),
+        related_terms: document.getElementById('editRelated').value.trim(),
+        image_url: document.getElementById('editImageUrl').value.trim()
+      };
+
+      if (!item.id || !item.term || !item.definition) {
+        alert('ID, Term, and Definition are required!');
+        return;
+      }
+
+      if (index === -1) {
+        // Check for duplicate ID
+        if (glossaryData.some(d => d.id === item.id)) {
+          alert('A term with this ID already exists!');
+          return;
+        }
+        glossaryData.push(item);
+      } else {
+        glossaryData[index] = item;
+      }
+
+      // Sort by ID
+      glossaryData.sort((a, b) => a.id.localeCompare(b.id));
+
+      updateStats();
+      renderTable();
+      closeModal();
+    }
+
+    function deleteTerm() {
+      const index = parseInt(document.getElementById('editIndex').value);
+      if (index >= 0 && confirm('Delete this term?')) {
+        glossaryData.splice(index, 1);
+        updateStats();
+        renderTable();
+        closeModal();
+      }
+    }
+
+    function downloadCSV() {
+      if (glossaryData.length === 0) {
+        alert('No data to download!');
+        return;
+      }
+
+      let csv = CSV_HEADERS.join(',') + '\n';
+
+      glossaryData.forEach(item => {
+        const row = [
+          item.id,
+          item.term,
+          item.definition,
+          item.category,
+          item.source,
+          item.needs_review ? 'true' : 'false',
+          item.aliases,
+          item.related_terms,
+          item.image_url
+        ].map(val => {
+          // Quote if contains comma, newline, or quotes
+          if (val.includes(',') || val.includes('\n') || val.includes('"')) {
+            return '"' + val.replace(/"/g, '""') + '"';
+          }
+          return val;
+        });
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'GLOSSARY.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('editModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('editModal')) closeModal();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "name": "@unravel/dictionary",
+  "version": "1.0.0",
+  "description": "NYC Building Trade Dictionary - Standalone glossary component for building trade terminology",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "nyc",
+    "building",
+    "construction",
+    "glossary",
+    "dictionary",
+    "dob",
+    "permit"
+  ],
+  "author": "Unravel Codes",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  },
+  "files": [
+    "src",
+    "data",
+    "docs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tomaszsb/dictionary"
+  }
+}
